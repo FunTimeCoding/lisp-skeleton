@@ -15,7 +15,7 @@ clisp src/Boilerplate.lisp
 
 This section explains how to use scripts that are intended to ease the development of this project.
 
-Install develoment tools.
+Install development tools.
 
 ```sh
 # TODO: Explain how to install tools required for the development of this project.

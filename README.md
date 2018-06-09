@@ -1,10 +1,19 @@
 # LispSkeleton
 
+## Setup
+
+Install project dependencies.
+
+```sh
+script/setup.sh
+```
+
+
 ## Usage
 
-This section explains how to use this project.
+This section explains how to use the project.
 
-Run the main entry point program.
+Run the main program.
 
 ```sh
 clisp src/Boilerplate.lisp
@@ -13,22 +22,40 @@ clisp src/Boilerplate.lisp
 
 ## Development
 
-This section explains how to use scripts that are intended to ease the development of this project.
+This section explains how to improve the project.
 
-Install development tools.
+Configure Git on Windows before cloning. This avoids problems with Vagrant and VirtualBox.
 
 ```sh
-# TODO: Explain how to install tools required for the development of this project.
+git config --global core.autocrlf input
 ```
 
-Run style check and show all concerns.
+Create the development virtual machine on Linux and Darwin.
 
 ```sh
-./run-style-check.sh
+script/vagrant/create.sh
 ```
 
-Build the project like Jenkins.
+Create the development virtual machine on Windows.
+
+```bat
+script\vagrant\create.bat
+```
+
+Run tests.
 
 ```sh
-./build.sh
+script/test.sh [--help]
+```
+
+Run style check.
+
+```sh
+script/check.sh [--help]
+```
+
+Build project.
+
+```sh
+script/build.sh
 ```

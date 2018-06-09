@@ -1,4 +1,5 @@
 #!/bin/sh -e
 
-./run-style-check.sh --ci-mode
+rm -rf build
+script/check.sh --ci-mode
 clisp src/Boilerplate.lisp

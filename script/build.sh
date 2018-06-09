@@ -2,4 +2,5 @@
 
 rm -rf build
 script/check.sh --ci-mode
-clisp src/Boilerplate.lisp
+# TODO: Find a compiler available on macOS and Debian
+#clisp src/Boilerplate.lisp

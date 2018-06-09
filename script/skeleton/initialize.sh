@@ -1,27 +1,27 @@
 #!/bin/sh -e
-# This tool is to initialize the project after cloning.
-# The goal is to make easy to create and test new projects.
 
-CAMEL=$(echo "${1}" | grep -E '^([A-Z]+[a-z0-9]*){2,}$') || CAMEL=""
+NAME=$(echo "${1}" | grep --extended-regexp '^([A-Z]+[a-z0-9]*){1,}$') || NAME=''
 
-if [ "${CAMEL}" = "" ]; then
-    echo "Usage: ${0} UpperCamelCaseName"
+if [ "${NAME}" = '' ]; then
+    echo "Usage: ${0} NAME"
+    echo "Name must be in upper camel case."
 
     exit 1
 fi
 
-OPERATING_SYSTEM=$(uname)
+SYSTEM=$(uname)
 
-if [ "${OPERATING_SYSTEM}" = "Linux" ]; then
-    SED="sed"
-    FIND="find"
+if [ "${SYSTEM}" = Darwin ]; then
+    SED='gsed'
+    FIND='gfind'
 else
-    SED="gsed"
-    FIND="gfind"
+    SED='sed'
+    FIND='find'
 fi
 
-DASH=$(echo "${CAMEL}" | ${SED} -E 's/([A-Za-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')
-rm init-project.sh sync-project.sh
+rm -rf script/skeleton
+DASH=$(echo "${NAME}" | ${SED} --regexp-extended 's/([A-Za-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')
+INITIALS=$(echo "${NAME}" | ${SED} 's/\([A-Z]\)[a-z]*/\1/g' | tr '[:upper:]' '[:lower:]')
 # shellcheck disable=SC2016
-${FIND} . -type f -regextype posix-extended ! -regex '^.*/(\.git|\.idea)/.*$' -exec sh -c '${1} -i -e "s/LispSkeleton/${2}/g" -e "s/lisp-skeleton/${3}/g" "${4}"' '_' "${SED}" "${CAMEL}" "${DASH}" '{}' \;
-echo "Done. Files were edited and moved. Review those changes."
+${FIND} . -type f -regextype posix-extended ! -regex '^.*/(build|\.git|\.idea)/.*$' -exec sh -c '${1} -i --expression "s/LispSkeleton/${2}/g" --expression "s/lisp-skeleton/${3}/g" --expression "s/bin\/ls/bin\/${4}/g" --expression "s/ss\\\\/${4}\\\\/g" "${5}"' '_' "${SED}" "${NAME}" "${DASH}" "${INITIALS}" '{}' \;
+echo "# This dictionary file is for domain language." > "documentation/dictionary/${DASH}.dic"

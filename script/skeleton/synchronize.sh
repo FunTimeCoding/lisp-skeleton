@@ -1,43 +1,47 @@
 #!/bin/sh -e
 
-TARGET_PROJECT="${1}"
+TARGET="${1}"
 
-if [ "${TARGET_PROJECT}" = "" ]; then
-    echo "Usage: ${0} TARGET_PROJECT"
-
-    exit 1
-fi
-
-if [ ! -d "${TARGET_PROJECT}" ]; then
-    echo "Target directory ${TARGET_PROJECT} does not exist."
+if [ "${TARGET}" = '' ]; then
+    echo "Usage: ${0} TARGET"
 
     exit 1
 fi
 
-CAMEL=$(head -n1 "${TARGET_PROJECT}"/README.md | awk '{ print $2 }' | grep -E '^([A-Z]+[a-z0-9]*){2,}$') || CAMEL=""
-
-if [ "${CAMEL}" = "" ]; then
-    echo "Could not determine the projects name in ${TARGET_PROJECT}."
+if [ ! -d "${TARGET}" ]; then
+    echo "Target directory does not exist."
 
     exit 1
 fi
 
-OPERATING_SYSTEM=$(uname)
+NAME=$(head -n 1 "${TARGET}/README.md" | awk '{ print $2 }' | grep --extended-regexp '^([A-Z]+[a-z0-9]*){1,}$') || NAME=''
 
-if [ "${OPERATING_SYSTEM}" = "Linux" ]; then
-    FIND="find"
-    SED="sed"
+if [ "${NAME}" = '' ]; then
+    echo "Could not determine the project name."
+
+    exit 1
+fi
+
+SYSTEM=$(uname)
+
+if [ "${SYSTEM}" = Darwin ]; then
+    FIND='gfind'
+    SED='gsed'
 else
-    FIND="gfind"
-    SED="gsed"
+    FIND='find'
+    SED='sed'
 fi
 
-cp ./*.md "${TARGET_PROJECT}"
-cp ./*.sh "${TARGET_PROJECT}"
-cp .gitignore "${TARGET_PROJECT}"
-DASH=$(echo "${CAMEL}" | ${SED} -E 's/([A-Za-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')
-cd "${TARGET_PROJECT}" || exit 1
-rm init-project.sh sync-project.sh
+cp ./*.md "${TARGET}"
+mkdir -p "${TARGET}/documentation"
+cp -R documentation/* "${TARGET}/documentation"
+mkdir -p "${TARGET}/script"
+cp -R script/* "${TARGET}/script"
+cp .gitignore "${TARGET}"
+cp Vagrantfile "${TARGET}"
+cd "${TARGET}" || exit 1
+rm -rf script/skeleton
+DASH=$(echo "${NAME}" | ${SED} --regexp-extended 's/([A-Za-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')
+INITIALS=$(echo "${NAME}" | ${SED} 's/\([A-Z]\)[a-z]*/\1/g' | tr '[:upper:]' '[:lower:]')
 # shellcheck disable=SC2016
-${FIND} . -type f -regextype posix-extended ! -regex '^.*/(\.git|\.idea)/.*$' -exec sh -c '${1} -i -e "s/LispSkeleton/${2}/g" -e "s/lisp-skeleton/${3}/g" "${4}"' '_' "${SED}" "${CAMEL}" "${DASH}" '{}' \;
-echo "Done. Files were copied to ${TARGET_PROJECT} and modified. Review those changes."
+${FIND} . -type f -regextype posix-extended ! -regex '^.*/(build|\.git|\.idea)/.*$' -exec sh -c '${1} -i --expression "s/LispSkeleton/${2}/g" --expression "s/lisp-skeleton/${3}/g" --expression "s/bin\/ls/bin\/${4}/g" --expression "s/ss\\\\/${4}\\\\/g" "${5}"' '_' "${SED}" "${NAME}" "${DASH}" "${INITIALS}" '{}' \;

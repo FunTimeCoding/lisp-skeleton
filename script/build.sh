@@ -1,6 +1,14 @@
 #!/bin/sh -e
 
 rm -rf build
+clisp src/Boilerplate.lisp
 script/check.sh --ci-mode
-# TODO: Find a compiler available on macOS and Debian
-#clisp src/Boilerplate.lisp
+script/measure.sh --ci-mode
+script/test.sh --ci-mode
+#SYSTEM=$(uname)
+#
+# TODO: Needs polish.
+#if [ "${SYSTEM}" = Linux ]; then
+#    script/debian/package.sh
+#    script/docker/build.sh
+#fi
